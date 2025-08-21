@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>إدارة المدارس</title>
+  <style>
+    /* 🎨 القاعدة العامة */
+    body {
+      font-family: 'Tahoma', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #121212;
+      color: #f5f5f5;
+      overflow-x: hidden;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0f0f0f, #1a1a1a);
+      color: #00ff99;
+      padding: 20px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    header::after {
+      content: "By: Hussien Ali Jalil";
+      position: absolute;
+      right: 20px;
+      bottom: 8px;
+      font-size: 14px;
+      color: #888;
+    }
+
+    .container {
+      width: 85%;
+      margin: 30px auto;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    /* ✨ البوكس الرئيسي للإضافة */
+    .form-box {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      margin-bottom: 25px;
+      transition: transform 0.3s ease;
+    }
+
+    .form-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      color: #00ffcc;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: none;
+      border-radius: 8px;
+      background: #2a2a2a;
+      color: #fff;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      background: #333;
+      box-shadow: 0 0 10px #00ff99;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .add-btn {
+      background: #00c853;
+      color: white;
+    }
+
+    .add-btn:hover {
+      background: #00e676;
+      box-shadow: 0 0 15px #00ff99;
+    }
+
+    .delete-btn {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: #ff3d3d;
+      box-shadow: 0 0 15px #ff5252;
+    }
+
+    /* 🎓 بطاقة المدرسة */
+    .school-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 15px;
+      align-items: center;
+      background: #1c1c1c;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+      animation: slideUp 0.5s ease;
+    }
+
+    .school-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+    }
+
+    .school-name input, .school-location input {
+      width: 95%;
+      background: #292929;
+    }
+
+    /* 🌟 أنيميشن */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>📚 إدارة المدارس</header>
+
+  <div class="container">
+    <div class="form-box">
+      <label>اسم المدرسة:</label>
+      <input type="text" id="schoolName" placeholder="أدخل اسم المدرسة">
+
+      <label>الموقع (Google Maps أو رابط):</label>
+      <input type="text" id="schoolLocation" placeholder="أدخل رابط الموقع">
+
+      <button class="add-btn" onclick="addSchool()">➕ إضافة مدرسة</button>
+    </div>
+
+    <div id="schoolsList"></div>
+  </div>
+
+  <script>
+    let schools = JSON.parse(localStorage.getItem("schools")) || [];
+
+    function saveSchools() {
+      localStorage.setItem("schools", JSON.stringify(schools));
+    }
+
+    function renderSchools() {
+      const list = document.getElementById("schoolsList");
+      list.innerHTML = "";
+      schools.forEach((school, index) => {
+        const div = document.createElement("div");
+        div.className = "school-box";
+        div.innerHTML = `
+          <div class="school-name">
+            <input type="text" value="${school.name}" onchange="editSchoolName(${index}, this.value)">
+          </div>
+          <div class="school-location">
+            <input type="text" value="${school.location}" onchange="editSchoolLocation(${index}, this.value)">
+          </div>
+          <div>
+            <button class="delete-btn" onclick="deleteSchool(${index})">🗑 حذف</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function addSchool() {
+      const name = document.getElementById("schoolName").value.trim();
+      const location = document.getElementById("schoolLocation").value.trim();
+
+      if (name && location) {
+        schools.push({ name, location });
+        saveSchools();
+        renderSchools();
+        document.getElementById("schoolName").value = "";
+        document.getElementById("schoolLocation").value = "";
+      } else {
+        alert("⚠️ الرجاء إدخال اسم المدرسة والموقع معاً");
+      }
+    }
+
+    function editSchoolName(index, newName) {
+      schools[index].name = newName;
+      saveSchools();
+    }
+
+    function editSchoolLocation(index, newLocation) {
+      schools[index].location = newLocation;
+      saveSchools();
+    }
+
+    function deleteSchool(index) {
+      if (confirm("هل أنت متأكد من الحذف؟")) {
+        schools.splice(index, 1);
+        saveSchools();
+        renderSchools();
+      }
+    }
+
+    renderSchools();
+  </script>
+
+</body>
+</html>
